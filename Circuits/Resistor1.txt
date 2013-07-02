@@ -1,0 +1,5 @@
+DCSS
+RES R1, 1, 2, 100
+RES R2, 2, 0, 100
+VSC Vsrc, 1, 0, 5
+VOL 2, 1.5
