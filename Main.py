@@ -1,6 +1,7 @@
 import re
 from string import Template
 from sympy import Symbol
+from sympy import simplify
 from sympy.solvers import solve
 from CircuitGraph import *
 from Components import *
@@ -31,8 +32,15 @@ def NodalAnalysis(Circuit):
     print('\nEquations: ' + str(Equations) + ' == 0')
     print('Unknowns: ' + str(Unknowns) + '\n')
 
-    #Solve the Circuit and Print
-    solutions = solve(Equations, Unknowns, manual=True, dict=True)[0]
+    #Solve the Circuit
+    temp = solve(Equations, Unknowns, manual=True, dict=True)[0]
+
+    #Simplify the Answer
+    solutions = {}
+    for N, V in temp.items():
+        solutions[N]=simplify(V)
+
+    #Print the solutions
     print('Solutions: ' + str(solutions) + '\n')
 
     #Put solutions back into graph
