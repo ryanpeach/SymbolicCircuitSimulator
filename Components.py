@@ -1,18 +1,21 @@
 from sympy import Symbol
 from sympy import oo
 
-def cincout(me):
+#This is a function frequently used by closed circuits
+def cincout(me,Node1, Node2):
     total = 0
-    for c in me.Node1.ComponentList:
+    for c in Node1.ComponentList:
         if c is not me:
-            if me.Node1 is c.Node2:           #Convert to Passive
+            if Node1 is c.Node2:
                 total += c.Current
-            elif me.Node1 is c.Node1:
+            elif Node1 is c.Node1:
                 total -= c.Current
 
     return total
 
-class Component:    
+#This is the class that all Components are based on
+class Component:
+    #Main defining classes
     def __init__(self, Name, Node1, Node2, Value=None, w=0):
         self.Node1=Node1
         self.Node2=Node2
@@ -20,7 +23,7 @@ class Component:
         Node2.add(self)
         self.w = w
         self.Name=Symbol(Name)
-        self.Value = Value
+        self.Value = Value #Not self._Value because some subclasses will modify this value
     def __str__(self): return str(self.Name)
 
     #Value will be used for the main attribute of the class
@@ -44,29 +47,24 @@ class Component:
 
 #Here are all the Impedance Components
 class Impedance(Component):
-    def __init__(self, Name, Node1, Node2, Value=None, w=0):
-        self.Impedance = Value
-        Component.__init__(self, Name, Node1, Node2, Value, w)
+    pass
 class Resistor(Impedance):
     pass
 class Inductor(Impedance):
     def set_Value(self,ind):
         if self.w == 0:
             self._Value = 0
-            self.Node1.Value = self.Node2.Value
         else:
             self._Value = complex(0,self.w*ind)
             
     def get_Current(self):
         if self.w == 0:            
-            #Current in = Current out
-            return cincout(self)
-            
+            return cincout(self,self.Node1,self.Node2)
         else:
             return self.Voltage/self.Value             #Assume Passive
                     
-    Value = property(Component.get_Value, set_Value)
     Current = property(get_Current)
+    Value = property(Component.get_Value, set_Value)
     
 class Capacitor(Impedance):
     def set_Value(self,c):
@@ -78,14 +76,15 @@ class Capacitor(Impedance):
         if self.w == 0:
             return 0
         else:
-            return self.Voltage/self.Value
+            return (self.Node1.Value-self.Node2.Value)
 
-    Value = property(Component.get_Value, set_Value)
     Current = property(get_Current)
+    Value = property(Component.get_Value, set_Value)
 
 #Here are all the Source Components
 class Source(Component):
     pass
+    
 class VSource(Source):
     def set_Value(self, Voltage):
         self._Value=Voltage
@@ -93,7 +92,7 @@ class VSource(Source):
     def get_Voltage(self):
         return self.Value
     def get_Current(self):
-        return cincout(self)
+        return cincout(self,self.Node1,self.Node2)
 
     Value = property(Component.get_Value,set_Value)
     Voltage = property(get_Voltage,set_Value)
