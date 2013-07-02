@@ -1,5 +1,6 @@
 DCSS
 RES R1, 1, 2, 100
-RES R2, 2, 0, 100
-VSC Vsrc, 1, 0, 5
-VOL 2, 1.5
+RES R2, 2, 3, 100
+IND I2, 3, 0, 1
+VOL 2, 100
+CSC I1, 1, 0, 1
